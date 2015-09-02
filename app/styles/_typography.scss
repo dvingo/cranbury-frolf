@@ -1,0 +1,14 @@
+@font-face {
+  font-family: circular;
+  src: url(/app/fonts/circular/circular-medium.otf);
+}
+
+body {
+  font-family: circular, Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+}
+h1, h2 {
+  line-height: 1.2;
+}
+
