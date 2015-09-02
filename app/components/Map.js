@@ -4,21 +4,21 @@ import Router from 'react-router'
 export default React.createClass({
 
   render() {
-    var {url, maxHeight, maxWidth, portraitUrl, zoom} = this.props
-    var width = Math.round(maxWidth * zoom)
-    var height = Math.round(maxHeight * zoom)
-    var urlToUse = url
-    if (window.innerHeight > window.innerWidth) {
-      urlToUse = portraitUrl
-      var temp = height
-      height = document.body.clientHeight//width
-      width = document.body.clientWidth//temp
-    }
+    var {url, height, width, portraitUrl, zoom, areas, onClick, name} = this.props
+    var areaList = areas.map(a => {
+      return (
+        <area shape="poly" coords={a.get('polyCoords')} alt={a.get('name')}
+              onClick={onClick.bind(null, a)}
+              style={{background: 'red'}}/>
+      )
+    })
     return (
-      <img src={urlToUse} height={height} width={width}/>
+      <div>
+        <img src={url} height={height} width={width} useMap={'#'+name}/>
+        <map name={name}>
+          {areaList}
+        </map>
+      </div>
     )
   }
 })
-
-//Set a minimum image size and allow scaling, when scaled just multiply the area coords by the scale factor
-//to get zoommable coords.

@@ -1,17 +1,39 @@
 import reactor from './reactor'
-// import stores
-reactor.registerStores({
-})
+var Nuclear = require('nuclear-js')
+var holeData = require('../fixtures/holeData')
+var Immutable = Nuclear.Immutable
 
-firebaseRef.onAuth(authData => {
-  if (authData) {
-    console.log("User is logged in")
-  } else {
-    console.log("User is logged out")
+var holesStore = new Nuclear.Store({
+  getInitialState() {
+    return Nuclear.toImmutable({})
+  },
+  initialize() {
+    this.on('setHole', (state, holeData) => {
+      return state.set(holeData.id, Immutable.fromJS(holeData))
+    })
   }
 })
 
+var imageMapStore = new Nuclear.Store({
+  getInitialState() {
+    return Nuclear.toImmutable(holeData.imageMap)
+  }
+})
+
+reactor.registerStores({
+  holes: holesStore,
+  imageMap: imageMapStore
+})
+
+Object.keys(holeData.holes).forEach(key => {
+  var hole = holeData.holes[key]
+  reactor.dispatch('setHole', hole)
+})
+
 module.exports = {
-  getters: getters,
-  actions: actions
+  getters: {
+    holes: [['holes'], holes => holes.toList()],
+    imageMap: ['imageMap']
+  },
+  //actions: actions
 }

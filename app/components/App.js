@@ -2,14 +2,25 @@ import React from 'react'
 import s from '../styles/main.scss'
 import Router from 'react-router'
 import Map from './Map'
+import reactor from '../state/reactor'
+import Store from '../state/main'
 var _ = require('underscore')
 
 export default React.createClass({
+  mixins: [reactor.ReactMixin],
+
+  getDataBindings() {
+    return {
+      holes: Store.getters.holes,
+      imageMap: Store.getters.imageMap
+    }
+  },
+
   getInitialState() {
     return {
-      imgHeight: window.innerHeight,
-      imgWidth: window.innerWidth,
-      zoom: 1
+      zoom: 1,
+      img: null,
+      imageIndex: 0
     }
   },
 
@@ -17,38 +28,38 @@ export default React.createClass({
     document.addEventListener('DOMContentLoaded', () => FastClick.attach(document.body))
   },
 
-  componentDidMount() {
-    console.log('did mount')
-    var self = this
-    var resizeHandler = _.throttle(function() {
-      self.setState({imgHeight: window.innerHeight, imgWidth: window.innerWidth})
-    }, 16)
-    window.addEventListener('resize', resizeHandler)
-  },
-
   handleInput(e) {
     this.setState({zoom: e.target.value})
   },
 
+  handleClick(area, e) {
+    var {imageIndex} = this.state
+    var images = area.get('images')
+    var imgIndex = (imageIndex + 1) % images.count()
+    var img = images.get(imgIndex)
+    this.setState({imageIndex:imgIndex, img:img})
+  },
+
   render() {
-    var height = 938//this.state.imgHeight
-    var width = 1330//this.state.imgWidth
-    console.log('rendering')
-    var inputStyle = {
+    var imageMap = this.state.imageMap
+    var imgStyle = {
       position: 'absolute',
-      top: 0,
-      left: 0
+      right: 0,
+      top: 0
     }
+    var img = this.state.img
+    var height = 509
+    var width = 336
     return (
-      <div>
-       <input style={inputStyle} onChange={this.handleInput}/>
-       <Map url={'./app/images/cranbury_park_trail_map-50pc.jpg'}
-            portraitUrl={'./app/images/cranbury_park_trail_map-50pc-portrait.jpg'}
-            maxHeight={938} maxWidth={1330} zoom={this.state.zoom}/>
+      <div style={{position:'relative'}}>
+        <img src={img} width={width} height={height} style={imgStyle}/>
+        <Map url={imageMap.get('url')}
+             onClick={this.handleClick}
+             areas={this.state.holes}
+             height={imageMap.get('height')} width={imageMap.get('width')}
+             name={imageMap.get('name')}
+             zoom={this.state.zoom}/>
       </div>
     )
   }
 })
-
-//Set a minimum image size and allow scaling, when scaled just multiply the area coords by the scale factor
-//to get zoommable coords.
